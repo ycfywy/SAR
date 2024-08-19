@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segment Anything Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            background-color: #e7e4e4;
+            padding: 10px;
+            border-right: 1px solid #ddd;
+            display: flex;
+            /* height: 100%; */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tool-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+
+        }
+
+        .tool-button input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            /* Hide the default file input */
+
+            /* Place it below the button text */
+        }
+
+        /* .tool-button span{ */
+
+        /* position: relative; Ensure span text is above the file input */
+        /* z-index: 1; Make sure span text is on top */
+        /* } */
+
+        .tool-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .mask-area {
+            position: relative;
+        }
+
+        .mask {
+            background-color: rgba(0, 0, 255, 0.5);
+            position: absolute;
+            top: 0;
+            left: 50px;
+            width: 100px;
+            height: 200px;
+        }
+
+        .navbar a {
+            color: #555;
+            padding: 10px 15px;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            color: #000;
+        }
+
+        .active {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .bigtext {
+
+            font-weight: bolder;
+            font-size: 20px;
+        }
+
+        .smalltext {
+            font-weight: normal;
+            opacity: 0.6;
+            font-size: 15px;
+        }
+
+        /* 页面背景遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 弹出框样式 */
+        .popup {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 600px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        /* 左侧照片样式 */
+        .popup img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            margin-right: 20px;
+            border-radius: 8px;
+        }
+
+        /* 中间箭头样式 */
+        .arrow {
+            font-size: 24px;
+            margin-right: 20px;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            border: 1px solid #ddd;
+        }
+
+        /* 第一列固定宽度 */
+        .col-text {
+            width: 50%;
+            text-align: center;
+            color: #2563ec;
+        }
+
+        /* 第二列固定宽度 */
+        .col-number {
+            width: 50%;
+            text-align: center;
+            color: #2563ec;
+        }
+
+
+        /* 颜色方块样式 */
+        .color-box {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+        }
+
+        .loading-bar {
+            width: 40%;
+            height: 10px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-bar:after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 100%;
+            background-color: #000000;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: loading 10s ease-in-out infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                width: 0;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        .popuploadbar {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="flex items-center justify-between p-4 border-b">
+        <div>
+            <div class="bigtext">
+                Segment Anything And Recognition
+            </div>
+            <div class="smalltext">
+                Researched By ycf
+            </div>
+        </div>
+
+        <div>
+            <a href="https://google.com"><img
+                    src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub"
+                    class="h-10"></a>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="flex" style="height:86vh;">
+        <!-- Sidebar -->
+        <div class="sidebar w-1/6 ml-10 mt-10">
+            <!-- <h2 class="text-lg font-semibold mb-2">Tools</h2> -->
+            <button class="tool-button">
+                <span>Upload</span>
+                <input type="file" id="imageInput" name="image" accept="image/*">
+            </button>
+
+
+            <div class="p-3 border rounded-md">
+                <h3 class="text-md font-semibold mb-2">Hover & Click</h3>
+                <p class="text-sm text-gray-600">Click an object one or more times. Shift-click to remove regions.</p>
+                <div class="tool-button mt-3">
+                    <span>Add Mask</span>
+                </div>
+                <div class="tool-button">
+                    <span>Remove Area</span>
+                </div>
+
+                <div class="tool-button mt-3 text-gray-400 border-gray-400">
+                    <span>Multi-mask</span>
+                </div>
+                <div class="tool-button mt-1 text-gray-400 border-gray-400">
+                    <span>Cut out object</span>
+                </div>
+            </div>
+
+            <div class="tool-button mt-3">
+                <span>Box</span>
+            </div>
+            <div class="tool-button">
+                <span>Everything</span>
+            </div>
+        </div>
+
+        <!-- Image display area -->
+        <div class="w-3/4 p-4 mt-10" style=" display: flex;  justify-content: center; align-items: center;">
+            <img src="" id="uploadedImage" style="width: 1000px; height: 800px; display: none;">
+        </div>
+    </div>
+
+
+    <!-- 弹出框的背景 -->
+    <div class="overlay" id="popupOverlay">
+        <div class="popup">
+            <!-- 左侧照片 -->
+            <img id="croppedImage" src="https://via.placeholder.com/100" alt="Sample Image">
+
+            <!-- 中间箭头 -->
+            <div class="arrow">→</div>
+
+            <!-- 右侧表格 -->
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-text">Text</th>
+                        <th class="col-number">Number</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- loading bar -->
+    <div class="overlay" id="loadingOverlay">
+        <div class="popuploadbar">
+            <div class="flex ">
+                <img class="mr-5" src=" static/assets/new-picture.svg">
+                <img class="mr-5" src=" static/assets/arrow-icn.svg">
+                <img class="mr-5" src="static/assets/icn-nn.svg">
+                <img class="mr-5" src="static/assets/arrow-icn.svg">
+                <img class="mr-5" src="static/assets/stack.svg">
+            </div>
+            <p class="py-4 text-sm md:text-lg">Extracting an embedding for the image...</p>
+            <div class="loading-bar"></div>
+        </div>
+    </div>
+
+
+    <script>
+        window.onload = function () {
+
+            const tbody = document.getElementById('table-body');
+            for (let i = 0; i < 10; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>???</td><td>???</td>';
+                tbody.appendChild(tr);
+            }
+        }
+        document.querySelector('#imageInput').addEventListener('change', function (event) {
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            const file = event.target.files[0];
+
+            if (file) {
+                const img = document.getElementById('uploadedImage')
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+                const formData = new FormData();
+                formData.append('image', file);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.blob())
+                    .then(blob => {
+                        setTimeout(() => {
+                            document.getElementById('loadingOverlay').style.display = 'none';
+                            const imageUrl = URL.createObjectURL(blob);
+                            img.src = imageUrl;
+                        }, 1000)
+                    }).catch(error => {
+                        console.error('Error:', error);
+                    });
+
+
+
+            }
+        });
+
+        document.getElementById('uploadedImage').addEventListener('click', function (event) {
+
+            document.getElementById('popupOverlay').style.display = 'flex';
+
+
+            const rect = event.target.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            console.log(`Clicked at (${x}, ${y})`);
+
+
+            fetch('/click_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ x: x, y: y }),
+            })
+                .then(response => response.blob())
+                .then(blob => {
+                    console.log("success");
+                    const imageUrl = URL.createObjectURL(blob);
+                    document.getElementById('croppedImage').src = imageUrl;
+                    
+
+                    fetch('/click_classify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ x: x, y: y }),
+
+                        // x y 发送到后端
+                        // 后端需要找出mask 然后截取图片 送到predict模块处理 返回结果
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            renderTable(data)
+                        }
+                        )
+                }
+                )
+
+        })
+        document.getElementById('popupOverlay').addEventListener('click', function (event) {
+            if (event.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+
+        function renderTable(data) {
+
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            data.forEach(element => {
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td1.textContent = element.class
+                const td2 = document.createElement('td');
+                td2.textContent = element.prob
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tableBody.appendChild(tr);
+            });
+        }
+
+    </script>
+</body>
+
+</html>

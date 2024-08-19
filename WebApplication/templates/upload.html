@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Display Example</title>
+</head>
+<body>
+    <h1>Upload and Display Processed Image</h1>
+    
+    <form id="uploadForm">
+        <input type="file" id="imageInput" name="image" accept="image/*">
+        <button type="submit">Upload Image</button>
+    </form>
+    
+    <h2>Processed Image:</h2>
+    <img id="uploadedImage" src="" alt="Your processed image will appear here" style="max-width: 300px;">
+
+    <script>
+        
+
+        document.getElementById('imageInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('uploadedImage').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const fileField = document.getElementById('imageInput');
+
+            formData.append('image', fileField.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())  // 将响应处理为blob数据
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                document.getElementById('uploadedImage').src = imageUrl;  // 更新图片src属性
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

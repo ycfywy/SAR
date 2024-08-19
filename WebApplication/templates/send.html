@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Click Coordinates</title>
+</head>
+<body>
+    <img id="clickable-image" src="../static/upload/IMG_20240720_143702.jpg" alt="Clickable Image" style="width: 800px; height: 600px; display: block;">
+
+    <script>
+        document.getElementById('clickable-image').addEventListener('click', function(event) {
+            // 获取图片上的点击坐标
+            const rect = event.target.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            console.log(rect);
+            
+            console.log(x,y);
+
+            
+            // 使用 fetch 发送请求
+            // fetch('/send-coordinates', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({ x: x, y: y }),
+            // })
+            // .then(response => response.json())
+            // .then(data => console.log('Coordinates sent successfully:', data))
+            // .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

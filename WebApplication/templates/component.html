@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup with Image, Arrow, and Table</title>
+    <style>
+        /* 页面背景遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 弹出框样式 */
+        .popup {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 600px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        /* 左侧照片样式 */
+        .popup img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 20px;
+            border-radius: 8px;
+        }
+
+        /* 中间箭头样式 */
+        .arrow {
+            font-size: 24px;
+            margin-right: 20px;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            border: 1px solid #ddd;
+        }
+
+        /* 第一列固定宽度 */
+        .col-text {
+            width: 50%;
+            text-align: center;
+            color: #2563ec;
+        }
+
+        /* 第二列固定宽度 */
+        .col-number {
+            width: 50%;
+            text-align: center;
+            color: #2563ec;
+        }
+
+ 
+        /* 颜色方块样式 */
+        .color-box {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+        }
+
+        /* 按钮样式 */
+        .open-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 弹出框的背景 -->
+    <div class="overlay" id="popupOverlay">
+        <div class="popup">
+            <!-- 左侧照片 -->
+            <img src="https://via.placeholder.com/100" alt="Sample Image">
+            
+            <!-- 中间箭头 -->
+            <div class="arrow">→</div>
+            
+            <!-- 右侧表格 -->
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-text">Text</th>
+                        <th class="col-number">Number</th>
+                    </tr>
+                </thead>
+                <tbody id = "table-body">
+                
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 打开弹出框的按钮 -->
+    <button class="open-btn" onclick="openPopup()">Open Popup</button>
+
+    <script>
+
+
+        window.onload = function(){
+
+            const tbody = document.getElementById('table-body');
+            for (let i = 0; i < 10; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>???</td><td>???</td>';
+                tbody.appendChild(tr);
+            }
+        }
+
+        function openPopup() {
+            document.getElementById('popupOverlay').style.display = 'flex';
+        }
+
+        document.getElementById('popupOverlay').addEventListener('click', function(event) {
+            if (event.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
