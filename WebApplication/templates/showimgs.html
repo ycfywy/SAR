@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Images</title>
+</head>
+<body>
+    <h1>Images from Flask</h1>
+    <img id="image1"></div>
+    <img id="image2"></div>
+
+    <script>
+        fetch('/returnimgs')
+        .then(response => response.json())
+        .then(data => {
+      
+            document.getElementById('image1').src = 'data:image/jpg;base64,' + data.mask;
+            document.getElementById('image2').src = 'data:image/jpg;base64,' + data.cropped;
+        })
+        .catch(error => console.error('Error fetching images:', error));
+    </script>
+</body>
+</html>

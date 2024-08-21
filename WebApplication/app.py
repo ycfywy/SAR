@@ -5,8 +5,8 @@ from PIL import Image
 from Sam import segment
 import numpy as np
 import cv2
-from VIT.predict import recognize
-
+from VIT.predict import recognize,recognize2
+import base64
 import sys
 
 
@@ -31,8 +31,23 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
  
+@app.route("/returnimgs",methods = ['GET'])
+def returnimgs():
+    print(os.getcwd())
+    mask = encode_image(os.path.join(os.getcwd(),'static/segment/mask.jpg'))
+    cropped = encode_image(os.path.join(os.getcwd(),'static/segment/cropped.jpg'))
+    
+    return jsonify({
+        'mask':mask,
+        'cropped':cropped
+    })
+@app.route("/showimgs",methods = ['GET'])
+def showimgs():
+    return render_template("showimgs.html")
 
 @app.route("/button",methods = ['GET'])
 def button():
@@ -43,7 +58,7 @@ def loadbar():
 
 @app.route("/predict",methods = ['GET'])
 def predict():
-    recognize()
+    recognize2()
     return render_template("predict.html")
 
 @app.route("/",methods = ['GET']) 
@@ -103,12 +118,21 @@ def click_image():
             print(f"find index {index}")
             mask = mask['segmentation']
             mask_ndarray = mask.astype(np.uint8)*255
+            cv2.imwrite('static/segment/mask.jpg',mask_ndarray)
             contours, _ = cv2.findContours(mask_ndarray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
             x,y,w,h = cv2.boundingRect(contours[0])
             cropped = image_ndarray[y:y+h,x:x+w]
             cropped = cv2.resize(cropped,(224,224))
             cv2.imwrite('static/segment/cropped.jpg',cropped)
-            return send_from_directory('static/segment', f"cropped.jpg")
+
+
+            mask = encode_image(os.path.join(os.getcwd(),'static/segment/mask.jpg'))
+            cropped = encode_image(os.path.join(os.getcwd(),'static/segment/cropped.jpg'))
+            
+            return jsonify({
+                'mask':mask,
+                'cropped':cropped
+            })
             
     return jsonify({"message":"fail"})
 
